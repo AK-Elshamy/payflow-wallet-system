@@ -1,14 +1,7 @@
 
 package com.elshamy.payflow.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -56,5 +49,12 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Wallet wallet;
+    public void assignWallet(Wallet wallet) {
+        this.wallet = wallet;
     }
 }
