@@ -5,10 +5,13 @@ import com.elshamy.payflow.dto.LoginRequestDTO;
 import com.elshamy.payflow.dto.LoginResponseDTO;
 import com.elshamy.payflow.dto.RegisterRequestDTO;
 import com.elshamy.payflow.dto.RegisterResponseDTO;
+import com.elshamy.payflow.entity.CurrencyCode;
 import com.elshamy.payflow.entity.User;
+import com.elshamy.payflow.entity.Wallet;
 import com.elshamy.payflow.exception.EmailAlreadyExistsException;
 import com.elshamy.payflow.exception.UsernameAlreadyExistsException;
 import com.elshamy.payflow.repository.UserRepository;
+import com.elshamy.payflow.repository.WalletRepository;
 import com.elshamy.payflow.security.JwtService;
 import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,17 +25,20 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final WalletRepository walletRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
     public AuthService(
             UserRepository userRepository,
+            WalletRepository walletRepository,
             PasswordEncoder passwordEncoder,
             AuthenticationManager authenticationManager,
             JwtService jwtService
     ) {
         this.userRepository = userRepository;
+        this.walletRepository = walletRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
@@ -62,6 +68,9 @@ public class AuthService {
         );
 
         User savedUser = userRepository.save(user);
+
+        Wallet wallet = new Wallet(savedUser, CurrencyCode.EGP);
+        walletRepository.save(wallet);
 
         return RegisterResponseDTO.fromEntity(savedUser);
     }
