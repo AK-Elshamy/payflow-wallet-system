@@ -68,4 +68,17 @@ public class Transfer {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+
+
+    public void markCompleted() {
+        this.status = TransferStatus.COMPLETED;
+        this.failureReason = null;
+    }
+
+    public void markFailed(String reason) {
+        this.status = TransferStatus.FAILED;
+        this.failureReason = reason;
+    }
+
 }

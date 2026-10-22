@@ -1,12 +1,14 @@
 
 package com.elshamy.payflow.entity;
 
+import com.elshamy.payflow.exception.IllegalOperationException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Entity
@@ -56,5 +58,51 @@ public class Wallet {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+
+    public void debit(BigDecimal amount) {
+        validateAmount(amount);
+
+        if (balance.compareTo(amount) < 0) {
+            throw new IllegalOperationException(
+                    "Insufficient wallet balance"
+            );
+        }
+
+        balance = balance.subtract(amount);
+    }
+
+    public void credit(BigDecimal amount) {
+        validateAmount(amount);
+
+        BigDecimal newBalance = balance.add(amount);
+
+        if (newBalance.scale() > 2) {
+            newBalance = newBalance.setScale(2, RoundingMode.UNNECESSARY);
+        }
+
+        if (newBalance.compareTo(new BigDecimal("99999999.99")) > 0) {
+            throw new IllegalOperationException(
+                    "Wallet balance exceeds the maximum allowed amount"
+            );
+        }
+
+        balance = newBalance;
+    }
+
+    private void validateAmount(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalOperationException(
+                    "Amount must be greater than zero"
+            );
+        }
+
+        if (amount.scale() > 2) {
+            throw new IllegalOperationException(
+                    "Amount must have at most two decimal places"
+            );
+        }
+    }
+
 
 }
